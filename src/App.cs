@@ -137,7 +137,6 @@ namespace NeverForget
             _startHidden = startHidden;
             _db = new Db(Path.Combine(Program.DataDir, "neverforget.db"));
             _store = new Store(_db);
-            _theme = _store.GetSetting("theme");
             string lang = _store.GetSetting("lang");
             if (lang == "en" || lang == "pt") Strings.Lang = lang;
 
@@ -248,13 +247,6 @@ namespace NeverForget
                         {
                             Strings.Lang = args.TryGetValue("value", out v) && (v as string) == "pt" ? "pt" : "en";
                             LocalizeTray();
-                        }
-                        else if (args.TryGetValue("key", out k) && (k as string) == "theme")
-                        {
-                            _theme = args.TryGetValue("value", out v) ? v as string : null;
-                            ApplyTitleBarTheme();
-                            BackColor = IsDark() ? Color.FromArgb(28, 27, 25) : Color.FromArgb(246, 244, 239);
-                            _web.DefaultBackgroundColor = BackColor;
                         }
                         break;
                     default: result = _store.Handle(cmd ?? "", args); break;
@@ -456,12 +448,8 @@ namespace NeverForget
             catch { }
         }
 
-        string _theme; // "system" | "light" | "dark" | null
-
-        bool IsDark()
+        static bool IsDark()
         {
-            if (_theme == "dark") return true;
-            if (_theme == "light") return false;
             try
             {
                 using (var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
