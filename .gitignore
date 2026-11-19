@@ -1,0 +1,16 @@
+# build output
+dist/
+
+# WebView2 SDK DLLs (downloaded by tools/fetch-webview2.ps1)
+lib/
+
+# local databases and logs
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# editor / tooling
+.claude/
+.vscode/
+.idea/

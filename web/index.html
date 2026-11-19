@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>NeverForget</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand" aria-hidden="true">
+    <svg viewBox="0 0 24 24" class="brand-mark"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8l-6 6H6a2 2 0 0 1-2-2z" fill="var(--note-yellow-strong)"/><path d="M14 20v-4a2 2 0 0 1 2-2h4" fill="none" stroke="var(--ink)" stroke-opacity=".35" stroke-width="1.5"/></svg>
+  </div>
+
+  <div class="seg" role="tablist" data-i18n-aria="views.label">
+    <button role="tab" data-view="board" aria-selected="true" data-i18n-title="view.board.title"><i data-icon="board"></i><span data-i18n="view.board"></span></button>
+    <button role="tab" data-view="wall" aria-selected="false" data-i18n-title="view.wall.title"><i data-icon="note"></i><span data-i18n="view.wall"></span></button>
+  </div>
+
+  <button class="chip" id="todayChip" aria-pressed="false" data-i18n-title="today.title"><i data-icon="calendar"></i><span data-i18n="today"></span><b class="chip-count" id="todayCount"></b></button>
+
+  <label class="search">
+    <i data-icon="search"></i>
+    <input id="search" type="search" data-i18n-ph="search.ph" data-i18n-aria="search.aria" autocomplete="off" spellcheck="false" maxlength="200">
+    <kbd>Ctrl F</kbd>
+  </label>
+
+  <div class="topbar-end">
+    <button class="icon-btn" id="autoBtn" data-i18n-title="auto.title" data-i18n-aria="menu.auto"><i data-icon="bolt"></i></button>
+    <button class="btn primary" id="newBtn" data-i18n-title="new.title"><i data-icon="plus"></i><span data-i18n="new"></span></button>
+    <div class="menu-wrap">
+      <button class="icon-btn" id="moreBtn" aria-haspopup="menu" aria-expanded="false" data-i18n-title="more.title" data-i18n-aria="more.title"><i data-icon="more"></i></button>
+      <div class="menu" id="moreMenu" role="menu" hidden>
+        <button role="menuitem" id="archiveDoneBtn"><i data-icon="archive"></i><span data-i18n="menu.archiveDone"></span></button>
+        <button role="menuitem" id="showArchivedBtn"><i data-icon="undo"></i><span data-i18n="menu.showArchived"></span></button>
+        <button role="menuitem" id="menuAutoBtn"><i data-icon="bolt"></i><span data-i18n="menu.auto"></span></button>
+        <button role="menuitemcheckbox" id="autostartBtn" aria-checked="false"><i data-icon="check" class="tick"></i><span data-i18n="menu.autostart"></span></button>
+        <hr>
+        <div class="menu-label" data-i18n="menu.language"></div>
+        <button role="menuitemradio" data-lang="en" aria-checked="false"><i data-icon="check" class="tick"></i>English</button>
+        <button role="menuitemradio" data-lang="pt" aria-checked="false"><i data-icon="check" class="tick"></i>Português</button>
+        <hr>
+        <div class="menu-help">
+          <div><kbd>N</kbd> <span data-i18n="help.new"></span></div>
+          <div><kbd>1</kbd> <kbd>2</kbd> <span data-i18n="help.views"></span></div>
+          <div><kbd>H</kbd> <span data-i18n="help.today"></span></div>
+          <div><kbd>A</kbd> <span data-i18n="help.auto"></span></div>
+          <div><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>N</kbd> <span data-i18n="help.global"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="board" id="board" data-i18n-aria="board.aria">
+    <div class="col" data-status="todo">
+      <div class="col-head"><h2 data-i18n="col.todo"></h2><span class="count"></span><button class="icon-btn sm add-in-col"><i data-icon="plus"></i></button></div>
+      <form class="quick-add" autocomplete="off">
+        <input name="t" data-i18n-ph="quick.ph" data-i18n-aria="quick.aria" maxlength="500">
+      </form>
+      <div class="cards" data-status="todo"></div>
+    </div>
+    <div class="col" data-status="doing">
+      <div class="col-head"><h2 data-i18n="col.doing"></h2><span class="count"></span><button class="icon-btn sm add-in-col"><i data-icon="plus"></i></button></div>
+      <div class="cards" data-status="doing"></div>
+    </div>
+    <div class="col" data-status="done">
+      <div class="col-head"><h2 data-i18n="col.done"></h2><span class="count"></span><button class="icon-btn sm add-in-col"><i data-icon="plus"></i></button></div>
+      <div class="cards" data-status="done"></div>
+    </div>
+  </section>
+
+  <section class="wall" id="wall" data-i18n-aria="wall.aria" hidden>
+    <div class="wall-canvas" id="wallCanvas"></div>
+    <p class="wall-hint" id="wallHint" data-i18n="wall.hint"></p>
+  </section>
+</main>
+
+<aside class="editor" id="editor" data-i18n-aria="editor.aria" hidden>
+  <div class="editor-head">
+    <span class="saved" id="savedState" aria-live="polite"></span>
+    <button class="icon-btn" id="closeEditor" data-i18n-title="close" data-i18n-aria="close"><i data-icon="x"></i></button>
+  </div>
+  <div class="editor-paper" id="editorPaper">
+    <textarea id="edTitle" class="ed-title" rows="1" data-i18n-ph="ed.titlePh" maxlength="500"></textarea>
+    <textarea id="edBody" class="ed-body" data-i18n-ph="ed.bodyPh" maxlength="20000"></textarea>
+  </div>
+  <div class="editor-fields">
+    <div class="field">
+      <span class="label" data-i18n="ed.color"></span>
+      <div class="swatches" id="edColors" role="radiogroup" data-i18n-aria="ed.colorsAria"></div>
+    </div>
+    <div class="field">
+      <span class="label" data-i18n="ed.status"></span>
+      <div class="seg small" id="edStatus" role="radiogroup" data-i18n-aria="ed.status">
+        <button data-v="todo" role="radio" data-i18n="col.todo"></button>
+        <button data-v="doing" role="radio" data-i18n="col.doing"></button>
+        <button data-v="done" role="radio" data-i18n="col.done"></button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label" data-i18n="ed.due"></span>
+      <div class="due-row">
+        <input type="date" id="edDue" data-i18n-aria="ed.dueAria">
+        <button class="btn ghost sm" data-due="0" data-i18n="ed.today"></button>
+        <button class="btn ghost sm" data-due="1" data-i18n="ed.tomorrow"></button>
+        <button class="btn ghost sm" data-due="" data-i18n="ed.noDue"></button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label" data-i18n="ed.priority"></span>
+      <label class="switch"><input type="checkbox" id="edPriority"><span class="track"></span><span data-i18n="ed.high"></span></label>
+    </div>
+  </div>
+  <div class="editor-foot">
+    <span class="meta" id="edMeta"></span>
+    <button class="btn danger-ghost" id="edDelete"><i data-icon="trash"></i><span data-i18n="ed.delete"></span></button>
+  </div>
+</aside>
+
+<aside class="editor" id="autoPanel" data-i18n-aria="auto.heading" hidden>
+  <div class="editor-head">
+    <h2 data-i18n="auto.heading"></h2>
+    <button class="icon-btn" data-close data-i18n-title="close" data-i18n-aria="close"><i data-icon="x"></i></button>
+  </div>
+  <div class="panel-body">
+    <p class="panel-intro" data-i18n="auto.intro"></p>
+
+    <section>
+      <h3 class="section-title" data-i18n="auto.yours"></h3>
+      <ul class="rule-list" id="ruleList"></ul>
+    </section>
+
+    <section>
+      <h3 class="section-title" data-i18n="auto.new"></h3>
+      <form class="builder" id="ruleForm" autocomplete="off">
+        <div class="row">
+          <span data-i18n="form.tasksThat"></span>
+          <select name="cond" data-i18n-aria="form.condAria">
+            <option value="inStatus" data-i18n="form.cond.inStatus"></option>
+            <option value="idle" data-i18n="form.cond.idle"></option>
+            <option value="overdue" data-i18n="form.cond.overdue"></option>
+            <option value="dueSoon" data-i18n="form.cond.dueSoon"></option>
+          </select>
+        </div>
+        <div class="row">
+          <select name="status" data-i18n-aria="form.colAria">
+            <option value="any" data-i18n="form.any"></option>
+            <option value="todo" data-i18n="form.in.todo"></option>
+            <option value="doing" data-i18n="form.in.doing"></option>
+            <option value="done" data-i18n="form.in.done"></option>
+          </select>
+        </div>
+        <div class="row">
+          <span data-days-label></span>
+          <input type="number" name="days" min="0" max="365" value="5" data-i18n-aria="form.daysAria">
+          <span data-i18n="form.days"></span>
+        </div>
+        <div class="row">
+          <span data-i18n="form.then"></span>
+          <select name="action" data-i18n-aria="form.actionAria"></select>
+        </div>
+        <div class="preview" id="rulePreview" aria-live="polite"></div>
+        <div class="actions-row">
+          <button class="btn primary sm" type="submit"><i data-icon="plus"></i><span data-i18n="form.create"></span></button>
+        </div>
+      </form>
+    </section>
+
+    <section id="suggestBox">
+      <h3 class="section-title" data-i18n="auto.suggestions"></h3>
+      <div class="suggestions" id="suggestions"></div>
+    </section>
+  </div>
+</aside>
+
+<aside class="editor" id="archPanel" data-i18n-aria="arch.heading" hidden>
+  <div class="editor-head">
+    <h2 data-i18n="arch.heading"></h2>
+    <button class="icon-btn" data-close data-i18n-title="close" data-i18n-aria="close"><i data-icon="x"></i></button>
+  </div>
+  <div class="panel-body">
+    <p class="panel-intro" data-i18n="arch.intro"></p>
+    <ul class="arch-list" id="archList"></ul>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" hidden>
+  <span id="toastText"></span>
+  <button class="btn link" id="toastAction"></button>
+</div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
