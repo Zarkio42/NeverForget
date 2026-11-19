@@ -31,7 +31,7 @@ A maioria dos apps de tarefas pede conta, assinatura e uma aba no navegador. O N
 - **Arquivadas**: notas arquivadas saem do quadro, mas podem ser restauradas.
 - **Bandeja**: fechar a janela só a esconde; `Ctrl+Alt+N` traz de volta de qualquer lugar. Iniciar com o Windows é opcional.
 - **Inglês e português**, seguindo o idioma do Windows (dá para trocar no menu `⋯`).
-- Temas **claro e escuro** conforme o Windows e layout responsivo.
+- Temas **claro e escuro**: segue o Windows por padrão, ou escolha um no menu **⋯**. Layout responsivo.
 - **Sem internet e privado**: sem conta, sem telemetria; o app não faz nenhuma requisição de rede.
 
 As capturas de tela em inglês estão no [README em inglês](README.md).

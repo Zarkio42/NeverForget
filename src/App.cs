@@ -129,6 +129,7 @@ namespace NeverForget
         readonly Store _store;
         readonly bool _startHidden;
         bool _exiting, _hintShown, _ready;
+        string _theme = "system"; // "system" follows Windows; "light" / "dark" force it
         ToolStripMenuItem _openItem, _newItem, _autoItem, _exitItem;
         const int HOTKEY_ID = 0x4E46;
 
@@ -139,16 +140,16 @@ namespace NeverForget
             _store = new Store(_db);
             string lang = _store.GetSetting("lang");
             if (lang == "en" || lang == "pt") Strings.Lang = lang;
+            _theme = NormalizeTheme(_store.GetSetting("theme"));
 
             Text = Program.AppName;
             Icon = AppIcon();
             MinimumSize = new Size(420, 480);
             StartPosition = FormStartPosition.Manual;
             LoadBounds();
-            BackColor = IsDark() ? Color.FromArgb(28, 27, 25) : Color.FromArgb(246, 244, 239);
 
             _web.Dock = DockStyle.Fill;
-            _web.DefaultBackgroundColor = BackColor;
+            ApplyBackColor();
             Controls.Add(_web);
 
             BuildTray();
@@ -205,6 +206,7 @@ namespace NeverForget
             core.DownloadStarting += (s, e) => { e.Cancel = true; };
             core.PermissionRequested += (s, e) => { e.State = CoreWebView2PermissionState.Deny; };
             core.WebMessageReceived += OnWebMessage;
+            ApplyWebColorScheme(); // before the first paint, so the page never flashes the other theme
             core.Navigate(Origin + "index.html");
         }
 
@@ -233,8 +235,16 @@ namespace NeverForget
                         result = new Dictionary<string, object> {
                             { "autostart", Shortcuts.AutostartEnabled() },
                             { "lang", Strings.Lang },
+                            { "theme", _theme },
                             { "autoChanged", ran } };
                         break;
+                    case "setTheme":
+                        object th;
+                        string theme = NormalizeTheme(args.TryGetValue("theme", out th) ? th as string : null);
+                        _store.SetSetting("theme", theme); // persist first: on failure nothing changes
+                        _theme = theme;
+                        ApplyTheme();
+                        result = _theme; break;
                     case "hide": HideToTray(); result = true; break;
                     case "setAutostart":
                         Shortcuts.SetAutostart(args.ContainsKey("on") && args["on"] is bool && (bool)args["on"]);
@@ -431,11 +441,39 @@ namespace NeverForget
         void OnUserPrefChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             if (e.Category != UserPreferenceCategory.General) return;
-            BeginInvoke(new Action(() =>
+            BeginInvoke(new Action(ApplyTheme));
+        }
+
+        static string NormalizeTheme(string t) { return t == "light" || t == "dark" ? t : "system"; }
+
+        // Title bar, window background and web content all follow _theme.
+        void ApplyTheme()
+        {
+            ApplyTitleBarTheme();
+            ApplyBackColor();
+            ApplyWebColorScheme();
+        }
+
+        void ApplyBackColor()
+        {
+            BackColor = IsDark() ? Color.FromArgb(28, 27, 25) : Color.FromArgb(246, 244, 239);
+            _web.DefaultBackgroundColor = BackColor;
+        }
+
+        // The page's CSS uses prefers-color-scheme; WebView2 answers it from this setting
+        // (Auto = the Windows app theme), which also themes scrollbars and native pickers.
+        void ApplyWebColorScheme()
+        {
+            var core = _web.CoreWebView2;
+            if (core == null) return;
+            try
             {
-                ApplyTitleBarTheme();
-                BackColor = IsDark() ? Color.FromArgb(28, 27, 25) : Color.FromArgb(246, 244, 239);
-            }));
+                core.Profile.PreferredColorScheme =
+                    _theme == "dark" ? CoreWebView2PreferredColorScheme.Dark :
+                    _theme == "light" ? CoreWebView2PreferredColorScheme.Light :
+                    CoreWebView2PreferredColorScheme.Auto;
+            }
+            catch (Exception ex) { Program.Log(ex); } // older WebView2 runtime: the page keeps following Windows
         }
 
         void ApplyTitleBarTheme()
@@ -448,8 +486,10 @@ namespace NeverForget
             catch { }
         }
 
-        static bool IsDark()
+        bool IsDark()
         {
+            if (_theme == "dark") return true;
+            if (_theme == "light") return false;
             try
             {
                 using (var k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))

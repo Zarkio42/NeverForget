@@ -32,7 +32,7 @@ Most task apps want an account, a subscription and a browser tab. NeverForget is
 - **Archive**: archived notes leave the board but can be restored at any time.
 - **Tray app**: closing the window only hides it; `Ctrl+Alt+N` brings it back from anywhere. Optional start with Windows.
 - **English and Portuguese**, following the Windows language (switchable in the `⋯` menu).
-- **Light and dark** themes following Windows, and a responsive layout down to narrow windows.
+- **Light and dark** themes: follows Windows by default, or pick one in the **⋯** menu. Responsive layout down to narrow windows.
 - **Offline and private**: no account, no telemetry; the app itself makes no network requests.
 
 | Wall | Editor |

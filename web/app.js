@@ -110,7 +110,7 @@ function mock(cmd, a) {
   const get = (id) => db.items.find((i) => i.id === Number(id));
   let r = true;
   switch (cmd) {
-    case 'ready': r = { autostart: !!db.settings.autostart, lang: db.settings.lang || null, autoChanged: 0 }; break;
+    case 'ready': r = { autostart: !!db.settings.autostart, lang: db.settings.lang || null, theme: db.settings.theme || 'system', autoChanged: 0 }; break;
     case 'list': r = db.items.filter((i) => !i.archived); break;
     case 'create': {
       const st = a.status || 'todo';
@@ -162,6 +162,8 @@ function mock(cmd, a) {
     case 'getSetting': r = db.settings[a.key] ?? null; break;
     case 'setSetting': db.settings[a.key] = a.value; break;
     case 'setAutostart': db.settings.autostart = !!a.on; r = !!a.on; break;
+    // The host applies the theme to the whole WebView; a plain browser has no equivalent, so only the choice is kept.
+    case 'setTheme': r = db.settings.theme = a.theme === 'light' || a.theme === 'dark' ? a.theme : 'system'; break;
   }
   localStorage.setItem(MOCK_KEY, JSON.stringify(db));
   return r && typeof r === 'object' ? JSON.parse(JSON.stringify(r)) : r;
@@ -850,6 +852,15 @@ function setAutostartUi(on) {
   $('#autostartBtn').setAttribute('aria-checked', String(state.autostart));
 }
 
+/* Theme: the host applies it (title bar + WebView color scheme); the menu only shows the choice. */
+$$('#moreMenu [data-theme-choice]').forEach((b) => b.addEventListener('click', async () => {
+  toggleMenu(false);
+  try { setThemeUi(await call('setTheme', { theme: b.dataset.themeChoice })); } catch (err) { failed(err); }
+}));
+function setThemeUi(theme) {
+  $$('#moreMenu [data-theme-choice]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.themeChoice === theme)));
+}
+
 /* ================= Side panels: automations and archive ================= */
 const panels = { auto: $('#autoPanel'), arch: $('#archPanel') };
 
@@ -1159,6 +1170,7 @@ window.addEventListener('focus', () => { if (state.day !== today()) { state.day 
   try {
     const info = (await call('ready')) || {};
     setAutostartUi(info.autostart);
+    setThemeUi(info.theme || 'system');
     const [items, view, lang] = await Promise.all([call('list'), call('getSetting', { key: 'view' }), call('getSetting', { key: 'lang' })]);
     state.items = items || [];
     setLanguage(lang || info.lang || LANG, false);
