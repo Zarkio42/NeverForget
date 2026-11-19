@@ -21,6 +21,10 @@ const I18N = {
     'menu.auto': 'Automations',
     'menu.autostart': 'Start with Windows',
     'menu.language': 'Language',
+    'menu.theme': 'Theme',
+    'theme.system': 'System',
+    'theme.light': 'Light',
+    'theme.dark': 'Dark',
     'help.new': 'new note', 'help.views': 'board / wall', 'help.today': 'today filter',
     'help.auto': 'automations', 'help.global': 'open from anywhere',
 
@@ -124,6 +128,10 @@ const I18N = {
     'menu.auto': 'Automações',
     'menu.autostart': 'Iniciar com o Windows',
     'menu.language': 'Idioma',
+    'menu.theme': 'Tema',
+    'theme.system': 'Sistema',
+    'theme.light': 'Claro',
+    'theme.dark': 'Escuro',
     'help.new': 'nova nota', 'help.views': 'quadro / mural', 'help.today': 'filtro hoje',
     'help.auto': 'automações', 'help.global': 'abrir de qualquer lugar',
 

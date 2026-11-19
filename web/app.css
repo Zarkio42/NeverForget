@@ -40,8 +40,10 @@
   --topbar-h: 56px;
 }
 
+/* Dark palette: automatic (follows Windows) unless the user forced light,
+   and forced when data-theme="dark". Keep both blocks identical. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --paper: #1c1b19;
     --paper-2: #232220;
@@ -71,6 +73,36 @@
     --note-ink: #f1ebdc;
     --note-ink-2: #cfc6b2;
   }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1c1b19;
+  --paper-2: #232220;
+  --surface: #2a2926;
+  --line: #36342f;
+  --line-strong: #4a463f;
+  --ink: #ece8e0;
+  --ink-2: #b8b2a6;
+  --ink-3: #a19b8f;
+  --accent: #8fb0f2;
+  --accent-ink: #13213d;
+  --accent-soft: #24304a;
+  --danger: #f08b7f;
+  --danger-soft: #3f2420;
+  --ok: #86c79c;
+  --focus: #8fb0f2;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .35);
+  --shadow-drag: 0 12px 24px rgba(0, 0, 0, .4), 0 28px 56px rgba(0, 0, 0, .4);
+
+  --note-yellow: #4a4024;  --note-yellow-strong: #d9ad3c;
+  --note-green:   #2f4229;  --note-green-strong:   #74ad5e;
+  --note-blue:    #283a50;  --note-blue-strong:    #6c9fd6;
+  --note-pink:    #4c2c33;  --note-pink-strong:    #d77d8b;
+  --note-purple:   #3a3150;  --note-purple-strong:   #a389d4;
+  --note-gray:   #36342f;  --note-gray-strong:   #8f897e;
+  --note-ink: #f1ebdc;
+  --note-ink-2: #cfc6b2;
 }
 
 * { box-sizing: border-box; }
@@ -350,7 +382,8 @@ main { flex: 1; min-height: 0; min-width: 0; position: relative; display: flex; 
 .tag.late { background: var(--danger); color: #fff; }
 .tag.today { background: var(--note-ink); color: var(--bg); }
 .tag.high { background: transparent; padding: 0 2px; color: var(--danger); }
-@media (prefers-color-scheme: dark) { .tag.high { color: #f2a196; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.high { color: #f2a196; } }
+:root[data-theme="dark"] .tag.high { color: #f2a196; }
 
 .card .actions {
   position: absolute; top: 6px; right: 6px;
@@ -496,7 +529,8 @@ body.editing .board { padding-right: 406px; }
 }
 .due-row input[type="date"]:focus { border-color: var(--accent); }
 ::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; }
-@media (prefers-color-scheme: dark) { ::-webkit-calendar-picker-indicator { filter: invert(.9); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) ::-webkit-calendar-picker-indicator { filter: invert(.9); } }
+:root[data-theme="dark"] ::-webkit-calendar-picker-indicator { filter: invert(.9); }
 
 .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; width: fit-content; }
 .switch input { position: absolute; opacity: 0; pointer-events: none; }
@@ -601,7 +635,8 @@ body.editing .board { padding-right: 406px; }
   animation: toast-in .22s var(--ease);
 }
 .toast .btn.link { color: color-mix(in srgb, var(--accent) 55%, var(--paper)); }
-@media (prefers-color-scheme: dark) { .toast .btn.link { color: #2f5bb8; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .toast .btn.link { color: #2f5bb8; } }
+:root[data-theme="dark"] .toast .btn.link { color: #2f5bb8; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } }
 
 /* Body text without a title leaves room for the hover actions */

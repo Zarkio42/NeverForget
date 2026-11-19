@@ -391,6 +391,15 @@ function setView(v, persist = true) {
   if (persist) call('setSetting', { key: 'view', value: v }).catch(() => {});
 }
 
+/* Theme: "system" follows Windows; "light"/"dark" force it. */
+function setTheme(theme, persist = true) {
+  const th = theme === 'light' || theme === 'dark' ? theme : 'system';
+  if (th === 'system') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', th);
+  $$('#moreMenu [data-theme-opt]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.themeOpt === th)));
+  if (persist) call('setSetting', { key: 'theme', value: th }).catch(() => {});
+}
+
 /* Re-renders every translated piece after a language change. */
 function setLanguage(lang, persist = true) {
   LANG = lang === 'pt' ? 'pt' : 'en';
@@ -822,6 +831,7 @@ function toggleMenu(open = menu.hidden) {
 moreBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
 document.addEventListener('click', (e) => { if (!menu.hidden && !e.target.closest('#moreMenu')) toggleMenu(false); });
 
+$$('#moreMenu [data-theme-opt]').forEach((b) => b.addEventListener('click', () => { toggleMenu(false); setTheme(b.dataset.themeOpt); }));
 $$('#moreMenu [data-lang]').forEach((b) => b.addEventListener('click', () => { toggleMenu(false); setLanguage(b.dataset.lang); }));
 
 $('#archiveDoneBtn').addEventListener('click', async () => {
@@ -1159,7 +1169,8 @@ window.addEventListener('focus', () => { if (state.day !== today()) { state.day 
   try {
     const info = (await call('ready')) || {};
     setAutostartUi(info.autostart);
-    const [items, view, lang] = await Promise.all([call('list'), call('getSetting', { key: 'view' }), call('getSetting', { key: 'lang' })]);
+    const [items, view, lang, theme] = await Promise.all([call('list'), call('getSetting', { key: 'view' }), call('getSetting', { key: 'lang' }), call('getSetting', { key: 'theme' })]);
+    setTheme(theme, false);
     state.items = items || [];
     setLanguage(lang || info.lang || LANG, false);
     setView(view === 'wall' ? 'wall' : 'board', false);
